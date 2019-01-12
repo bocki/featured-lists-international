@@ -1,5 +1,169 @@
+<!doctype html>
 <html>
-<body>
-Hello World!
-</body>
+  <head>
+    <title>Featured Playlists</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+      #loggedin {
+        display: none;
+      }
+
+      body { 
+        margin: 10px 10px; 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        background-color: #282828;
+        color: white;
+      }
+
+      button {
+        border: none;
+        margin-left: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        height: 3em;
+        vertical-align: middle;
+        background-color: #fff;
+        margin-top: 2em;
+        margin-bottom: 2em;
+      }
+
+      h1 { margin: 0; margin-left: 5px; padding: 0;}
+
+      a { color: white; text-decoration: none; }
+
+      #featured h2 { font-size: 0.8em; margin-bottom: 0.15em; }
+
+      .featured-grid { 
+        display: flex;  
+        flex-wrap: wrap;
+      }
+
+      .featured-grid div { 
+        border-left: 5px solid transparent; border-right: 5px solid transparent;
+        max-width: 165px;
+      }
+
+      .featured-grid div img { height: auto ; max-width: 100%; }
+
+      @media (min-width: 800px) {
+        .featured-grid div { 
+          max-width: 250px;
+        }
+      }
+
+      #countries { margin-left: 5px; }
+      #countries a { display:block; line-height: 2em;}
+
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div id="loggedin">
+        <div id="featured">
+        </div>
+        <div id="countries">
+          <a href="#" data-country="GB">United Kingdom</a>
+          <a href="#" data-country="SE">Sweden</a>
+          <a href="#" data-country="DE">Germany</a>
+          <a href="#" data-country="CA">Canada</a>
+          <a href="#" data-country="US">United States</a>
+        </div>
+      </div>
+      <div id="login">
+        <h1>Featured Playlists</h1>
+        <button id="login-button">Log in with Spotify</button>
+      </div>
+    </div>
+
+    <script id="featured-template" type="text/x-handlebars-template">
+      <h1>{{message}}</h1>
+      <div class="featured-grid">
+          {{#each playlists.items}}
+          <div>
+            <h2>{{name}}</h2>
+            <a href="{{external_urls.spotify}}">
+              <img src="{{images.0.url}}" />
+            </a>
+          </div>
+          {{/each}}
+      </div>
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
+    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+      (function() {
+        /**
+         * Obtains parameters from the hash of the URL
+         * @return Object
+         */
+        function getHashParams() {
+          var hashParams = {};
+          var e, r = /([^&;=]+)=?([^&;]*)/g,
+              q = window.location.hash.substring(1);
+          while ( e = r.exec(q)) {
+             hashParams[e[1]] = decodeURIComponent(e[2]);
+          }
+          return hashParams;
+        }
+
+        function getPlaylists(access_token, country='GB') {
+          $.ajax({
+              url: 'https://api.spotify.com/v1/browse/featured-playlists?country='+country,
+              headers: {
+                'Authorization': 'Bearer ' + access_token
+              },
+              success: function(response) {
+                console.log(response)
+                featuredPlaceholder.innerHTML = featuredTemplate(response);
+
+                $('#login h1').hide();
+                $('#loggedin').show();
+                document.getElementById('login-button').innerHTML = "Reload";
+              }
+          });
+        }
+
+        var featuredSource = document.getElementById('featured-template').innerHTML,
+            featuredTemplate = Handlebars.compile(featuredSource),
+            featuredPlaceholder = document.getElementById('featured');
+
+        var params = getHashParams();
+
+        var access_token = params.access_token;
+
+        if (access_token) {
+          var country = localStorage.getItem('country');
+          if(country) {
+            getPlaylists(access_token, country);
+          } else {
+            getPlaylists(access_token, 'GB');
+          }
+        } else {
+              $('#login h1').show();
+              $('#loggedin').hide();
+        }
+
+        document.getElementById('login-button').addEventListener('click', function() {
+          var client_id = '306b3f278bff4ed89b4311853b355d35'; // Your client id
+          var redirect_uri = 'https://bocki.github.io/featured-lists-international/'; // Your redirect uri
+
+          var url = 'https://accounts.spotify.com/authorize';
+          url += '?response_type=token';
+          url += '&client_id=' + encodeURIComponent(client_id);
+          url += '&redirect_uri=' + encodeURIComponent(redirect_uri);
+          window.location = url;
+        }, false);
+
+        $("#countries > a").click(function(e) {
+          e.preventDefault();
+          var country=$( this ).data("country");
+          localStorage.setItem('country', country);
+          getPlaylists(access_token, country);
+        });
+
+      })();
+    </script>
 </html>
