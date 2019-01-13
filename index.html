@@ -51,10 +51,22 @@
           max-width: 250px;
         }
       }
+      
+      @media screen and (-webkit-min-device-pixel-ratio:0) { 
+        select,
+        textarea,
+        input,
+        select:focus,
+        textarea:focus,
+        input:focus {
+          font-size: 16px;
+        }
+      }
 
       #countries { margin-left: 5px; margin-top: 2em;}
-      
-      select { min-width: 250px; }
+
+      .selectize-input {width: auto !important; min-width: 300px !important;}
+
     </style>
   </head>
 
@@ -152,6 +164,8 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.12/handlebars.min.js"></script>
     <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.default.min.css" />
     <script>
       (function() {
         /**
@@ -220,6 +234,12 @@
           var country=$( this ).val();
           localStorage.setItem('country', country);
           getPlaylists(access_token, country);
+        });
+        var selectElement = $("#select-country").selectize();
+
+        $("#countries > .selectize-control").click(function() {
+          var selectize = selectElement[0].selectize;
+          selectize.clear(true);
         });
 
       })();
