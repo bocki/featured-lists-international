@@ -159,7 +159,7 @@
       <div class="featured-grid">
           {{#each playlists.items}}
           <div>
-            <h2>{{name}}</h2>
+            <h2><a href="{{uri}}">{{name}}</a></h2>
             <a href="{{external_urls.spotify}}">
               <img src="{{images.0.url}}" />
             </a>
@@ -173,7 +173,7 @@
       <div class="featured-grid">
           {{#each albums.items}}
           <div>
-            <h2>{{name}}</h2>
+            <h2><a href="{{uri}}">{{name}}</a></h2>
             <h3>{{artists.0.name}}</h3>
             <a href="{{external_urls.spotify}}">
               <img src="{{images.0.url}}" />
