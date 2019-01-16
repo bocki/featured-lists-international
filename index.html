@@ -221,6 +221,24 @@
           return hashParams;
         }
 
+        function pad(number) {
+          if (number < 10) {
+            return '0' + number;
+          }
+          return number;
+        }
+
+        function getTimestamp() {
+          var timestamp = new Date();
+
+          return timestamp.getFullYear() +
+            '-' + pad(timestamp.getMonth() + 1) +
+            '-' + pad(timestamp.getDate()) +
+            'T' + pad(timestamp.getHours()) +
+            ':' + pad(timestamp.getMinutes()) +
+            ':' + pad(timestamp.getSeconds());
+        }
+
         function getPlaylists(access_token, country='GB') {
           $.ajax({
               url: 'https://api.spotify.com/v1/browse/featured-playlists?country='+country,
@@ -240,7 +258,7 @@
 
         function getReleases(access_token, country='GB') {
           $.ajax({
-              url: 'https://api.spotify.com/v1/browse/new-releases?limit=12&country='+country,
+              url: 'https://api.spotify.com/v1/browse/new-releases?limit=12&country='+country+'&timestamp='+getTimestamp(),
               headers: {
                 'Authorization': 'Bearer ' + access_token
               },
