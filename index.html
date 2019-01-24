@@ -247,11 +247,27 @@
               },
               success: function(response) {
                 console.log(response);
+                localStorage.setItem('loggedinbefore', 1);
+                localStorage.setItem('errorcount', 0)
                 featuredPlaceholder.innerHTML = featuredTemplate(response);
 
                 $('#login h1').hide();
                 $('#loggedin').show();
                 document.getElementById('login-button').innerHTML = "Reload";
+              },
+              error: function(jqXHR, textStatus, errorThrown) {
+                console.log("Error: " + errorThrown);
+                var loggedinbefore = localStorage.getItem('loggedinbefore');
+                var errorcount = parseInt(localStorage.getItem('errorcount'));
+                errorcount++;
+                console.log('Error count: ' + errorcount);
+                localStorage.setItem('errorcount', errorcount);
+
+                if (loggedinbefore && errorcount <= 1 ) {
+                  console.log("Trying to reauthorize...")
+                  doLogin();
+                }
+
               }
           });
         }
@@ -267,6 +283,17 @@
                 releasesPlaceholder.innerHTML = releasesTemplate(response);
               }
           });
+        }
+
+        function doLogin() {
+          var client_id = '306b3f278bff4ed89b4311853b355d35'; // Your client id
+          var redirect_uri = 'https://bocki.github.io/featured-lists-international/'; // Your redirect uri
+
+          var url = 'https://accounts.spotify.com/authorize';
+          url += '?response_type=token';
+          url += '&client_id=' + encodeURIComponent(client_id);
+          url += '&redirect_uri=' + encodeURIComponent(redirect_uri);
+          window.location = url;
         }
 
         var featuredSource = document.getElementById('featured-template').innerHTML,
@@ -291,19 +318,20 @@
             getReleases(access_token, 'GB');
           }
         } else {
-              $('#login h1').show();
-              $('#loggedin').hide();
+          var loggedinbefore = localStorage.getItem('loggedinbefore');
+          var errorcount = parseInt(localStorage.getItem('errorcount'));
+          errorcount++;
+          console.log('Error count: ' + errorcount);
+          localStorage.setItem('errorcount', errorcount);
+
+          if (loggedinbefore && errorcount <= 1 ) {
+            console.log("Trying to reauthorize...")
+            doLogin();
+          }
         }
 
         document.getElementById('login-button').addEventListener('click', function() {
-          var client_id = '306b3f278bff4ed89b4311853b355d35'; // Your client id
-          var redirect_uri = 'https://bocki.github.io/featured-lists-international/'; // Your redirect uri
-
-          var url = 'https://accounts.spotify.com/authorize';
-          url += '?response_type=token';
-          url += '&client_id=' + encodeURIComponent(client_id);
-          url += '&redirect_uri=' + encodeURIComponent(redirect_uri);
-          window.location = url;
+          doLogin();
         }, false);
 
         $("#select-country").change(function() {
